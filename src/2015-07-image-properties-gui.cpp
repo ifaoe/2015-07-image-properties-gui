@@ -16,7 +16,7 @@ int main(int argc, char * argv[]) {
 	ConfigHandler * cfg = new ConfigHandler(argc, argv);
 	DatabaseHandler * db = new DatabaseHandler(cfg);
 	MainWindow window(cfg,db);
-	window.show();
+	window.showMaximized();
 
 	return app.exec();
 }

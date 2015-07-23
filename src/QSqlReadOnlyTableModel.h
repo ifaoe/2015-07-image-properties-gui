@@ -12,9 +12,15 @@
 
 class QSqlReadOnlyTableModel : public QSqlTableModel {
 public:
-	QSqlReadOnlyTableModel();
+	QSqlReadOnlyTableModel(QObject * parent, QSqlDatabase * db);
 	virtual ~QSqlReadOnlyTableModel();
-	const Qt::ItemFlags flags(const QModelIndex & index);
+	void set_order_by_clause(QString clause) { order_by_clause_ = clause; }
+//	const Qt::ItemFlags flags(const QModelIndex & index);
+protected:
+	QString orderByClause() const;
+//	void QSqlTableModel::setQuery(const QSqlQuery & query);
+private:
+	QString order_by_clause_ = "";
 };
 
 #endif /* QSQLREADONLYTABLEMODEL_H_ */

@@ -23,6 +23,7 @@ public:
 	QStringList GetProjectTracs();
 	void GetStuk4Codes(QString type, QComboBox * combo_box);
 	bool SaveCode(QString type);
+	QSqlDatabase * GetDatabase() {return db;}
 private:
 	ConfigHandler * cfg = 0;
 	QSqlDatabase * db = 0;

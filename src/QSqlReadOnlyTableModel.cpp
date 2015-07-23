@@ -7,14 +7,22 @@
 
 #include "QSqlReadOnlyTableModel.h"
 
-QSqlReadOnlyTableModel::QSqlReadOnlyTableModel() {
-	// TODO Auto-generated constructor stub
+QSqlReadOnlyTableModel::QSqlReadOnlyTableModel(QObject * parent, QSqlDatabase * db) {
+	QSqlTableModel(parent,*db);
 }
 
 QSqlReadOnlyTableModel::~QSqlReadOnlyTableModel() {
 	// TODO Auto-generated destructor stub
 }
+//
+//const Qt::ItemFlags QSqlReadOnlyTableModel::flags(const QModelIndex & index) {
+//	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+//}
 
-const Qt::ItemFlags QSqlReadOnlyTableModel::flags(const QModelIndex & index) {
-	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+//void QSqlTableModel::setQuery(const QSqlQuery & query) {
+//
+//}
+
+QString QSqlReadOnlyTableModel::orderByClause() const{
+	return order_by_clause_;
 }

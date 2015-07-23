@@ -12,7 +12,7 @@
 #include <QMainWindow>
 #include "ConfigHandler.h"
 #include "DatabaseHandler.h"
-#include <QSqlQueryModel>
+#include "QSqlReadOnlyTableModel.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,17 +28,24 @@ private:
 	DatabaseHandler * db = 0;
 	Ui::MainWindow * ui = 0;
 	QMap<QString, QString> filter_map;
-	QSqlQueryModel * property_table;
+	QSqlReadOnlyTableModel * property_table;
+	QMap<QString,int> index_list;
 	void LoadSession();
 	void InitFilters();
 	void ApplyFilters();
 	void SetTableQuery(QString where);
+	void SetTableData(QString column_name, QVariant data);
 private slots:
 	void HandleServerSelection();
 	void HandleSessionSelection();
 	void HandleImageFilter();
 	void HandleTracFilter(int index);
 	void HandleCameraFilter(int index);
+	void HandleSaveGlareData();
+	void HandleSaveSeastateData();
+	void HandleSaveTurbidityData();
+	void HandleSaveIceData();
+	void HandleSaveClarityData();
 };
 
 #endif /* MAINWINDOW_H_ */

@@ -8,19 +8,26 @@
 #include "MainWindow.h"
 #include <QInputDialog>
 #include <QDebug>
-#include <iostream>
+#include <QProgressDialog>
 
 MainWindow::MainWindow(ConfigHandler * cfg, DatabaseHandler * db)
 	: cfg(cfg), db(db), ui(new Ui::MainWindow) {
 	// TODO Auto-generated constructor stub
 	ui->setupUi(this);
 
-	property_table = new QSqlQueryModel;
+	property_table = new QSqlReadOnlyTableModel(this, db->GetDatabase());
 	ui->tableView_image_properties->setModel(property_table);
 	ui->tableView_image_properties->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 	connect(ui->actionMit_Server_verbinden, SIGNAL(triggered()),this, SLOT(HandleServerSelection()));
 	connect(ui->actionProject_laden, SIGNAL(triggered()),this, SLOT(HandleSessionSelection()));
+
+	connect(ui->pushButton_save_glare,SIGNAL(clicked()),this, SLOT(HandleSaveGlareData()));
+	connect(ui->pushButton_save_clarity,SIGNAL(clicked()),this, SLOT(HandleSaveClarityData()));
+	connect(ui->pushButton_save_ice,SIGNAL(clicked()),this, SLOT(HandleSaveIceData()));
+	connect(ui->pushButton_save_seastate,SIGNAL(clicked()),this, SLOT(HandleSaveSeastateData()));
+	connect(ui->pushButton_save_turbidity,SIGNAL(clicked()),this, SLOT(HandleSaveTurbidityData()));
+
 }
 
 MainWindow::~MainWindow() {
@@ -28,12 +35,15 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::LoadSession() {
-	property_table->clear();
 	InitFilters();
 	ApplyFilters();
 }
 
 void MainWindow::InitFilters() {
+	disconnect(ui->comboBox_cam, SIGNAL(currentIndexChanged(int)),this, SLOT(HandleCameraFilter(int)));
+	disconnect(ui->comboBox_trc, SIGNAL(currentIndexChanged(int)),this, SLOT(HandleTracFilter(int)));
+	disconnect(ui->lineEdit_image_filter, SIGNAL(editingFinished()),this, SLOT(HandleImageFilter()));
+
 	ui->comboBox_cam->clear();
 	ui->comboBox_cam->addItems(db->GetProjectCams());
 	ui->comboBox_trc->clear();
@@ -47,17 +57,12 @@ void MainWindow::InitFilters() {
 void MainWindow::ApplyFilters() {
 	ui->tableView_image_properties->clearSelection();
 	QStringList filters = filter_map.values();
-	filters.prepend("TRUE");
 	SetTableQuery(filters.join(" AND "));
+
 }
 
-void MainWindow::SetTableQuery(QString where = "TRUE") {
-	QString query = "SELECT trc as Transekt, cam as Kamera, img as Bildnummer, "
-				"glare_key as Glare, seastate, turbidity, clarity, ice FROM image_properties WHERE session='%1' "
-				"AND %2 ORDER BY trc, cam, img";
-	qDebug() << query;
-	std::cout << query.arg(cfg->project()).arg(where).toStdString() << std::endl;
-	property_table->setQuery(query.arg(cfg->project()).arg(where));
+void MainWindow::SetTableQuery(QString where) {
+	property_table->setFilter(where);
 }
 
 void MainWindow::HandleServerSelection() {
@@ -78,6 +83,49 @@ void MainWindow::HandleServerSelection() {
 	db->GetStuk4Codes("SEASTATE",ui->comboBox_seastate);
 	db->GetStuk4Codes("ICE",ui->comboBox_ice);
 	db->GetStuk4Codes("TURBIDITY",ui->comboBox_turbidity);
+
+	property_table->setTable("image_properties");
+	property_table->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	property_table->select();
+
+
+	index_list.clear();
+	index_list["glare_key"] = property_table->fieldIndex("glare_key");
+	index_list["seastate"] = property_table->fieldIndex("seastate");
+	index_list["turbidity"] =  property_table->fieldIndex("turbidity");
+	index_list["clarity"] = property_table->fieldIndex("clarity");
+	index_list["ice"] = property_table->fieldIndex("ice");
+	index_list["trc"] = property_table->fieldIndex("trc");
+	index_list["cam"] = property_table->fieldIndex("cam");
+	index_list["img"] = property_table->fieldIndex("img");
+
+ 	for (int i=0; i<property_table->columnCount(); i++) {
+		if (!index_list.values().contains(i))
+			ui->tableView_image_properties->hideColumn(i);
+	}
+
+ 	ui->tableView_image_properties->horizontalHeader()->moveSection(index_list["trc"],0);
+
+	property_table->setFilter("FALSE");
+	property_table->set_order_by_clause("ORDER BY trc, cam, img");
+}
+
+void MainWindow::SetTableData(QString column_name, QVariant data) {
+	int column = property_table->fieldIndex(column_name);
+	QModelIndexList index_list = ui->tableView_image_properties->selectionModel()->selectedRows(column);
+	QProgressDialog update_progress("Aktualisiere Datenbank...", "Abbrechen",0,index_list.size(),this);
+	update_progress.setWindowModality(Qt::WindowModal);
+	update_progress.show();
+	for (int i=0; i<index_list.size(); i++) {
+		update_progress.setValue(i);
+		if (update_progress.wasCanceled())
+			break;
+		property_table->setData(index_list[i], data.toString());
+		property_table->submit();
+		QApplication::processEvents( QEventLoop::ExcludeUserInputEvents);
+	}
+
+//	property_table->submitAll();
 }
 
 void MainWindow::HandleSessionSelection() {
@@ -86,7 +134,9 @@ void MainWindow::HandleSessionSelection() {
 			db->GetProjectList(),0,false,&check);
 	if (check) {
 		cfg->set_project(project);
+		filter_map["session"] = QString("session='%1'").arg(project);
 	} else {
+		filter_map.remove("session");
 		return;
 	}
 	LoadSession();
@@ -108,7 +158,7 @@ void MainWindow::HandleImageFilter() {
 
 void MainWindow::HandleTracFilter(int index) {
 	if (index == 0)
-		filter_map["trc"] = "TRUE";
+		filter_map.remove("trc");
 	else
 		filter_map["trc"] = QString("trc='%1'").arg(ui->comboBox_trc->currentText());
 	ApplyFilters();
@@ -116,10 +166,25 @@ void MainWindow::HandleTracFilter(int index) {
 
 void MainWindow::HandleCameraFilter(int index) {
 	if (index == 0)
-		filter_map["cam"] = "TRUE";
+		filter_map.remove("cam");
 	else
 		filter_map["cam"] = QString("cam='%1'").arg(ui->comboBox_cam->currentText());
 	ApplyFilters();
 }
 
+void MainWindow::HandleSaveGlareData() {
+	SetTableData("glare_key",ui->comboBox_glare->currentData());
+}
 
+void MainWindow::HandleSaveSeastateData() {
+	SetTableData("seastate",ui->comboBox_seastate->currentData());
+}
+void MainWindow::HandleSaveTurbidityData() {
+	SetTableData("turbidity",ui->comboBox_turbidity->currentData());
+}
+void MainWindow::HandleSaveIceData() {
+	SetTableData("ice",ui->comboBox_ice->currentData());
+}
+void MainWindow::HandleSaveClarityData() {
+	SetTableData("clarity",ui->comboBox_clarity->currentData());
+}

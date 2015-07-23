@@ -12,11 +12,11 @@
 DatabaseHandler::DatabaseHandler(ConfigHandler * cfg) : cfg(cfg){
 	// TODO Auto-generated constructor stub
     db = new QSqlDatabase();
-    *db = QSqlDatabase::addDatabase("QPSQL");
-
+	*db = QSqlDatabase::addDatabase("QPSQL");
     if (!db->isValid()) {
         qFatal("Database invalid: QPSQL");
     }
+
 }
 
 void DatabaseHandler::OpenDatabase() {
@@ -73,7 +73,7 @@ QStringList DatabaseHandler::GetProjectTracs() {
 
 void DatabaseHandler::GetStuk4Codes(QString type, QComboBox * combo_box) {
 	combo_box->clear();
-	combo_box->addItem("",-1);
+	combo_box->addItem("",QVariant());
 	qDebug() << "Calling DatabaseHandler::GetStuk4Codes";
 	QString query_string = "SELECT code, description FROM stuk4_codes where type='%1'";
 	qDebug() << query_string.arg(type);
@@ -85,5 +85,6 @@ void DatabaseHandler::GetStuk4Codes(QString type, QComboBox * combo_box) {
 }
 
 bool DatabaseHandler::SaveCode(QString type) {
-
+	Q_UNUSED(type);
+	return true;
 }
