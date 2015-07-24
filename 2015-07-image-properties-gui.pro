@@ -1,4 +1,4 @@
-QT += widgets core gui sql
+QT += core gui sql
 
 TARGET = daisi-img-prop
 TEMPLATE = app
@@ -21,8 +21,8 @@ HEADERS  += MainWindow.h \
 VPATH += ./qt_ui
 FORMS    += main_window.ui
 			
-#INCLUDEPATH += /usr/include
-#DEPENDPATH += /usr/include
+INCLUDEPATH += /usr/include
+DEPENDPATH += /usr/include
 
 DEFINES += 
 

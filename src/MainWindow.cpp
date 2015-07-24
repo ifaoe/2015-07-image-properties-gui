@@ -54,10 +54,9 @@ void MainWindow::InitFilters() {
 
 void MainWindow::ApplyFilters() {
 	ui->tableView_image_properties->clearSelection();
-	ui->tableView_image_properties->resizeColumnsToContents();
 	QStringList filters = filter_map.values();
 	SetTableQuery(filters.join(" AND "));
-
+	ui->tableView_image_properties->resizeColumnsToContents();
 }
 
 void MainWindow::SetTableQuery(QString where) {
