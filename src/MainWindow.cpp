@@ -17,7 +17,8 @@ MainWindow::MainWindow(ConfigHandler * cfg, DatabaseHandler * db)
 
 	property_table = new QSqlReadOnlyTableModel(this, db->GetDatabase());
 	ui->tableView_image_properties->setModel(property_table);
-	ui->tableView_image_properties->horizontalHeader()->setStretchLastSection(true);
+//	ui->tableView_image_properties->horizontalHeader()->setStretchLastSection(true);
+	ui->tableView_image_properties->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
 	connect(ui->actionMit_Server_verbinden, SIGNAL(triggered()),this, SLOT(HandleServerSelection()));
 	connect(ui->actionProject_laden, SIGNAL(triggered()),this, SLOT(HandleSessionSelection()));
@@ -56,7 +57,7 @@ void MainWindow::ApplyFilters() {
 	ui->tableView_image_properties->clearSelection();
 	QStringList filters = filter_map.values();
 	SetTableQuery(filters.join(" AND "));
-	ui->tableView_image_properties->resizeColumnsToContents();
+//	ui->tableView_image_properties->resizeColumnsToContents();
 }
 
 void MainWindow::SetTableQuery(QString where) {
@@ -101,6 +102,7 @@ void MainWindow::HandleServerSelection() {
 	index_list["turbidity"] =  property_table->fieldIndex("turbidity");
 	index_list["clarity"] = property_table->fieldIndex("clarity");
 	index_list["ice"] = property_table->fieldIndex("ice");
+	index_list["remarks"] = property_table->fieldIndex("remarks");
 	index_list["trc"] = property_table->fieldIndex("trc");
 	index_list["cam"] = property_table->fieldIndex("cam");
 	index_list["img"] = property_table->fieldIndex("img");
