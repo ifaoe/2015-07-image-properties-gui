@@ -45,7 +45,7 @@ QStringList DatabaseHandler::GetProjectList() {
 	qDebug() << query_string;
 	QSqlQuery query(query_string);
 	while (query.next())
-		return_list.append(query.value("session").toString());
+		return_list.append(query.value(0).toString());
 	return return_list;
 }
 
@@ -57,7 +57,7 @@ QStringList DatabaseHandler::GetProjectCams() {
 	qDebug() << query_string;
 	QSqlQuery query(query_string.arg(cfg->project()));
 	while (query.next())
-		return_list.append(query.value("cam").toString());
+		return_list.append(query.value(0).toString());
 	return return_list;
 }
 
@@ -69,7 +69,7 @@ QStringList DatabaseHandler::GetProjectTracs() {
 	qDebug() << query_string;
 	QSqlQuery query(query_string.arg(cfg->project()));
 	while (query.next())
-		return_list.append(query.value("trc").toString());
+		return_list.append(query.value(0).toString());
 	return return_list;
 }
 
@@ -81,8 +81,8 @@ void DatabaseHandler::GetStuk4Codes(QString type, QComboBox * combo_box) {
 	qDebug() << query_string.arg(type);
 	QSqlQuery query(query_string.arg(type));
 	while (query.next()) {
-		combo_box->addItem( query.value("code").toString() + " - " + query.value("description").toString(),
-				query.value("code"));
+		combo_box->addItem( query.value(0).toString() + " - " + query.value(1).toString(),
+				query.value(0));
 	}
 }
 

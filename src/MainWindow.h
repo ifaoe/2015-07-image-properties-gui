@@ -42,11 +42,7 @@ private slots:
 	void HandleImageFilter();
 	void HandleTracFilter(int index);
 	void HandleCameraFilter(int index);
-	void HandleSaveGlareData();
-	void HandleSaveSeastateData();
-	void HandleSaveTurbidityData();
-	void HandleSaveIceData();
-	void HandleSaveClarityData();
+	void HandleSaveData(QAbstractButton * button);
 };
 
 #endif /* MAINWINDOW_H_ */

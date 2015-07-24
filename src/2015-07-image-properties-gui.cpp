@@ -12,6 +12,8 @@
 #include "DatabaseHandler.h"
 
 int main(int argc, char * argv[]) {
+    QApplication::setDesktopSettingsAware(false);
+    QApplication::setStyle("GTK+");
 	QApplication app(argc,argv);
 	ConfigHandler * cfg = new ConfigHandler(argc, argv);
 	DatabaseHandler * db = new DatabaseHandler(cfg);

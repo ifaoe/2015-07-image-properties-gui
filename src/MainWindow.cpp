@@ -17,16 +17,13 @@ MainWindow::MainWindow(ConfigHandler * cfg, DatabaseHandler * db)
 
 	property_table = new QSqlReadOnlyTableModel(this, db->GetDatabase());
 	ui->tableView_image_properties->setModel(property_table);
-	ui->tableView_image_properties->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui->tableView_image_properties->horizontalHeader()->setStretchLastSection(true);
 
 	connect(ui->actionMit_Server_verbinden, SIGNAL(triggered()),this, SLOT(HandleServerSelection()));
 	connect(ui->actionProject_laden, SIGNAL(triggered()),this, SLOT(HandleSessionSelection()));
 
-	connect(ui->pushButton_save_glare,SIGNAL(clicked()),this, SLOT(HandleSaveGlareData()));
-	connect(ui->pushButton_save_clarity,SIGNAL(clicked()),this, SLOT(HandleSaveClarityData()));
-	connect(ui->pushButton_save_ice,SIGNAL(clicked()),this, SLOT(HandleSaveIceData()));
-	connect(ui->pushButton_save_seastate,SIGNAL(clicked()),this, SLOT(HandleSaveSeastateData()));
-	connect(ui->pushButton_save_turbidity,SIGNAL(clicked()),this, SLOT(HandleSaveTurbidityData()));
+	connect(ui->buttonGroup_save_type,SIGNAL(buttonClicked(QAbstractButton*)),this, SLOT(HandleSaveData(QAbstractButton*)));
+
 
 }
 
@@ -57,6 +54,7 @@ void MainWindow::InitFilters() {
 
 void MainWindow::ApplyFilters() {
 	ui->tableView_image_properties->clearSelection();
+	ui->tableView_image_properties->resizeColumnsToContents();
 	QStringList filters = filter_map.values();
 	SetTableQuery(filters.join(" AND "));
 
@@ -122,7 +120,7 @@ void MainWindow::HandleServerSelection() {
 void MainWindow::SetTableData(QString column_name, QVariant data) {
 	int column = property_table->fieldIndex(column_name);
 	QModelIndexList index_list = ui->tableView_image_properties->selectionModel()->selectedRows(column);
-	QProgressDialog update_progress("Aktualisiere Datenbank...", "Abbrechen",0,index_list.size(),this);
+	QProgressDialog update_progress("Erstelle Datensatz...", "Abbrechen",0,index_list.size(),this);
 	update_progress.setWindowModality(Qt::WindowModal);
 	update_progress.show();
 	for (int i=0; i<index_list.size(); i++) {
@@ -132,6 +130,7 @@ void MainWindow::SetTableData(QString column_name, QVariant data) {
 		property_table->setData(index_list[i], data.toString());
 		QApplication::processEvents( QEventLoop::ExcludeUserInputEvents);
 	}
+	update_progress.setLabelText("Schreibe Daten in Datenbank...");
 	property_table->submitAll();
 	UpdateProgress();
 }
@@ -180,19 +179,19 @@ void MainWindow::HandleCameraFilter(int index) {
 	ApplyFilters();
 }
 
-void MainWindow::HandleSaveGlareData() {
-	SetTableData("glare_key",ui->comboBox_glare->currentData());
-}
-
-void MainWindow::HandleSaveSeastateData() {
-	SetTableData("seastate",ui->comboBox_seastate->currentData());
-}
-void MainWindow::HandleSaveTurbidityData() {
-	SetTableData("turbidity",ui->comboBox_turbidity->currentData());
-}
-void MainWindow::HandleSaveIceData() {
-	SetTableData("ice",ui->comboBox_ice->currentData());
-}
-void MainWindow::HandleSaveClarityData() {
-	SetTableData("clarity",ui->comboBox_clarity->currentData());
+void MainWindow::HandleSaveData(QAbstractButton * button) {
+	QString type = button->property("dbvalue").toString();
+	if (type == "glare_key") {
+		SetTableData(type, ui->comboBox_glare->itemData(ui->comboBox_glare->currentIndex()));
+	} else if (type == "seastate") {
+		SetTableData(type, ui->comboBox_seastate->itemData(ui->comboBox_seastate->currentIndex()));
+	} else if (type == "turbidity") {
+		SetTableData(type,ui->comboBox_turbidity->itemData(ui->comboBox_turbidity->currentIndex()));
+	} else if (type == "clarity") {
+		SetTableData(type, ui->comboBox_clarity->itemData(ui->comboBox_clarity->currentIndex()));
+	} else if (type == "ice") {
+		SetTableData(type, ui->comboBox_ice->itemData(ui->comboBox_ice->currentIndex()));
+	} else if (type == "remarks") {
+		SetTableData(type, ui->plainTextEdit_remarks->toPlainText());
+	}
 }

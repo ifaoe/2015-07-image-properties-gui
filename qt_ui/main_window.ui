@@ -134,6 +134,9 @@
             <property name="dbvalue" stdset="0">
              <string>glare_key</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup_save_type</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -163,6 +166,9 @@
             <property name="dbvalue" stdset="0">
              <string>seastate</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup_save_type</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -192,6 +198,9 @@
             <property name="dbvalue" stdset="0">
              <string>turbidity</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup_save_type</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -221,6 +230,9 @@
             <property name="dbvalue" stdset="0">
              <string>clarity</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup_save_type</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -250,6 +262,9 @@
             <property name="dbvalue" stdset="0">
              <string>ice</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup_save_type</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -307,6 +322,9 @@
             <property name="dbvalue" stdset="0">
              <string>remarks</string>
             </property>
+            <attribute name="buttonGroup">
+             <string notr="true">buttonGroup_save_type</string>
+            </attribute>
            </widget>
           </item>
          </layout>
@@ -374,4 +392,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup_save_type"/>
+ </buttongroups>
 </ui>
