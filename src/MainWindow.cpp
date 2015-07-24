@@ -37,6 +37,7 @@ MainWindow::~MainWindow() {
 void MainWindow::LoadSession() {
 	InitFilters();
 	ApplyFilters();
+	UpdateProgress();
 }
 
 void MainWindow::InitFilters() {
@@ -63,6 +64,14 @@ void MainWindow::ApplyFilters() {
 
 void MainWindow::SetTableQuery(QString where) {
 	property_table->setFilter(where);
+}
+
+void MainWindow::UpdateProgress() {
+	ui->groupBox_glare->setTitle("Glare: " + db->GetPropertyProgress("glare_key"));
+	ui->groupBox_seastate->setTitle("Seastate: " + db->GetPropertyProgress("seastate"));
+	ui->groupBox_turbidity->setTitle("Turbidity: " + db->GetPropertyProgress("turbidity"));
+	ui->groupBox_clarity->setTitle("Clarity: " + db->GetPropertyProgress("clarity"));
+	ui->groupBox_ice->setTitle("Ice: " + db->GetPropertyProgress("ice"));
 }
 
 void MainWindow::HandleServerSelection() {
@@ -121,11 +130,10 @@ void MainWindow::SetTableData(QString column_name, QVariant data) {
 		if (update_progress.wasCanceled())
 			break;
 		property_table->setData(index_list[i], data.toString());
-		property_table->submit();
 		QApplication::processEvents( QEventLoop::ExcludeUserInputEvents);
 	}
-
-//	property_table->submitAll();
+	property_table->submitAll();
+	UpdateProgress();
 }
 
 void MainWindow::HandleSessionSelection() {

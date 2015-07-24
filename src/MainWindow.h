@@ -35,6 +35,7 @@ private:
 	void ApplyFilters();
 	void SetTableQuery(QString where);
 	void SetTableData(QString column_name, QVariant data);
+	void UpdateProgress();
 private slots:
 	void HandleServerSelection();
 	void HandleSessionSelection();

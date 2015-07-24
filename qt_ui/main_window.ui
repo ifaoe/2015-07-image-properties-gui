@@ -140,7 +140,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="groupBox_seastate">
          <property name="title">
           <string>Seastate</string>
          </property>
@@ -160,7 +160,7 @@
             <property name="text">
              <string>Speichern</string>
             </property>
-            <property name="db_value" stdset="0">
+            <property name="dbvalue" stdset="0">
              <string>seastate</string>
             </property>
            </widget>
@@ -169,7 +169,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="groupBox_turbidity">
          <property name="title">
           <string>Turbidity</string>
          </property>
@@ -198,7 +198,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
+        <widget class="QGroupBox" name="groupBox_clarity">
          <property name="title">
           <string>Clarity</string>
          </property>
@@ -227,7 +227,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_5">
+        <widget class="QGroupBox" name="groupBox_ice">
          <property name="title">
           <string>Ice</string>
          </property>

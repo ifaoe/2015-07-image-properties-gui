@@ -24,6 +24,7 @@ public:
 	void GetStuk4Codes(QString type, QComboBox * combo_box);
 	bool SaveCode(QString type);
 	QSqlDatabase * GetDatabase() {return db;}
+	QString GetPropertyProgress(QString type);
 private:
 	ConfigHandler * cfg = 0;
 	QSqlDatabase * db = 0;
