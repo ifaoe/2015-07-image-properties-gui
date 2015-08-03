@@ -7,8 +7,6 @@
 
 #include "MainWindow.h"
 #include <QInputDialog>
-#include <QDebug>
-#include <QProgressDialog>
 
 MainWindow::MainWindow(ConfigHandler * cfg, DatabaseHandler * db)
 	: cfg(cfg), db(db), ui(new Ui::MainWindow) {
@@ -17,14 +15,11 @@ MainWindow::MainWindow(ConfigHandler * cfg, DatabaseHandler * db)
 
 	property_table = new QSqlReadOnlyTableModel(this, db->GetDatabase());
 	ui->tableView_image_properties->setModel(property_table);
-//	ui->tableView_image_properties->horizontalHeader()->setStretchLastSection(true);
-	ui->tableView_image_properties->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
 	connect(ui->actionMit_Server_verbinden, SIGNAL(triggered()),this, SLOT(HandleServerSelection()));
 	connect(ui->actionProject_laden, SIGNAL(triggered()),this, SLOT(HandleSessionSelection()));
 
 	connect(ui->buttonGroup_save_type,SIGNAL(buttonClicked(QAbstractButton*)),this, SLOT(HandleSaveData(QAbstractButton*)));
-
 
 }
 
@@ -57,7 +52,8 @@ void MainWindow::ApplyFilters() {
 	ui->tableView_image_properties->clearSelection();
 	QStringList filters = filter_map.values();
 	SetTableQuery(filters.join(" AND "));
-//	ui->tableView_image_properties->resizeColumnsToContents();
+	ui->tableView_image_properties->resizeColumnsToContents();
+	ui->tableView_image_properties->horizontalHeader()->setStretchLastSection(true);
 }
 
 void MainWindow::SetTableQuery(QString where) {
@@ -113,6 +109,7 @@ void MainWindow::HandleServerSelection() {
 	}
 
  	ui->tableView_image_properties->horizontalHeader()->moveSection(index_list["trc"],0);
+ 	ui->tableView_image_properties->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 
 	property_table->setFilter("FALSE");
 	property_table->set_order_by_clause("ORDER BY trc, cam, img");
@@ -121,19 +118,48 @@ void MainWindow::HandleServerSelection() {
 void MainWindow::SetTableData(QString column_name, QVariant data) {
 	int column = property_table->fieldIndex(column_name);
 	QModelIndexList index_list = ui->tableView_image_properties->selectionModel()->selectedRows(column);
-	QProgressDialog update_progress("Erstelle Datensatz...", "Abbrechen",0,index_list.size(),this);
-	update_progress.setWindowModality(Qt::WindowModal);
-	update_progress.show();
+	QItemSelection old_selection = ui->tableView_image_properties->selectionModel()->selection();
+	progress_dialog_ = new QProgressDialog(tr("Speichere aktuelle Auswahl..."), tr("Abbrechen"),0,old_selection.size(),this);
+	progress_dialog_->setWindowModality(Qt::WindowModal);
+	progress_dialog_->setMinimumDuration(0);
+	progress_dialog_->show();
+	QList<int> top_left_row, top_left_column;
+	QList<int> bottom_right_row, bottom_right_column;
+	for (int i=0; i<old_selection.size();i++) {
+		progress_dialog_->setValue(i);
+		top_left_row.append(old_selection[i].topLeft().row());
+		top_left_column.append(old_selection[i].topLeft().column());
+		bottom_right_row.append(old_selection[i].bottomRight().row());
+		bottom_right_column.append(old_selection[i].bottomRight().column());
+	}
+	progress_dialog_->setLabelText(tr("Erstelle Datensatz"));
+	progress_dialog_->setRange(0,index_list.size());
+	progress_dialog_->setValue(0);
 	for (int i=0; i<index_list.size(); i++) {
-		update_progress.setValue(i);
-		if (update_progress.wasCanceled())
+		progress_dialog_->setValue(i);
+		if (progress_dialog_->wasCanceled())
 			break;
 		property_table->setData(index_list[i], data.toString());
-		QApplication::processEvents( QEventLoop::ExcludeUserInputEvents);
 	}
-	update_progress.setLabelText("Schreibe Daten in Datenbank...");
+	progress_dialog_->setLabelText(tr("Schreibe Daten in Datenbank..."));
+	database_progess_ = index_list.size();
+	connect(property_table, SIGNAL(beforeUpdate(int, QSqlRecord&)), this, SLOT(UpdateDatabaseProgress()));
 	property_table->submitAll();
+	progress_dialog_->setLabelText(tr("Stelle Auswahl wieder her..."));
+	progress_dialog_->setRange(0, top_left_row.size());
+	QModelIndex top_left, bottom_right;
+	QItemSelection selection ;
+	for (int i=0; i<top_left_row.size(); i++) {
+		progress_dialog_->setValue(i);
+		if (progress_dialog_->wasCanceled())
+			break;
+		top_left = property_table->index(top_left_row[i],top_left_column[i],QModelIndex());
+		bottom_right = property_table->index(bottom_right_row[i],bottom_right_column[i],QModelIndex());
+		selection.select(top_left, bottom_right);
+	}
+	ui->tableView_image_properties->selectionModel()->select(selection,QItemSelectionModel::Select);
 	UpdateProgress();
+	delete progress_dialog_;
 }
 
 void MainWindow::HandleSessionSelection() {
@@ -195,4 +221,9 @@ void MainWindow::HandleSaveData(QAbstractButton * button) {
 	} else if (type == "remarks") {
 		SetTableData(type, ui->plainTextEdit_remarks->toPlainText());
 	}
+}
+
+void MainWindow::UpdateDatabaseProgress() {
+	progress_dialog_->setValue(progress_dialog_->maximum() - database_progess_);
+	database_progess_--;
 }

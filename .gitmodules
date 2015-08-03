@@ -1,0 +1,6 @@
+[submodule "2015-07-QThreadedProgress"]
+	path = 2015-07-QThreadedProgress
+	url = https://github.com/ifaoe/2015-07-QThreadedProgress.git
+[submodule "src/QtExtension"]
+	path = src/QtExtension
+	url = https://github.com/awmath/2015-07-QtExtension.git

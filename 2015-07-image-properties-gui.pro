@@ -10,13 +10,13 @@ SOURCES += 2015-07-image-properties-gui.cpp \
         MainWindow.cpp \
         ConfigHandler.cpp \
         DatabaseHandler.cpp \
-        QSqlReadOnlyTableModel.cpp
+        QtExtension/QSqlReadOnlyTableModel.cpp 
 
 		
 HEADERS  += MainWindow.h \
         ConfigHandler.h \
         DatabaseHandler.h \
-        QSqlReadOnlyTableModel.h
+        QtExtension/QSqlReadOnlyTableModel.h
 
 VPATH += ./qt_ui
 FORMS    += main_window.ui

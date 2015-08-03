@@ -10,9 +10,11 @@
 
 #include "ui_main_window.h"
 #include <QMainWindow>
+#include <QDebug>
+#include <QProgressDialog>
 #include "ConfigHandler.h"
 #include "DatabaseHandler.h"
-#include "QSqlReadOnlyTableModel.h"
+#include "QtExtension/QSqlReadOnlyTableModel.h"
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +26,8 @@ public:
 	MainWindow(ConfigHandler * cfg, DatabaseHandler * db);
 	virtual ~MainWindow();
 private:
+	QProgressDialog * progress_dialog_ = 0;
+	int database_progess_ = 0;
 	ConfigHandler * cfg = 0;
 	DatabaseHandler * db = 0;
 	Ui::MainWindow * ui = 0;
@@ -43,6 +47,7 @@ private slots:
 	void HandleTracFilter(int index);
 	void HandleCameraFilter(int index);
 	void HandleSaveData(QAbstractButton * button);
+	void UpdateDatabaseProgress();
 };
 
 #endif /* MAINWINDOW_H_ */
